@@ -1,43 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FindAWayProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using FindAWayProject.Models;
+using System;
 
 namespace FindAWayProject.Controllers
 {
     public class HomeController : Controller
     {
+        public IPathService Service;
+
+        public HomeController(IPathService service)
+        {
+            Service = service ?? throw new ArgumentNullException(nameof(service));
+        }
+
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult About()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult StartGame()
         {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
+            return Json(Service.GeneratePath());
         }
 
-        public IActionResult Contact()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult VerifyPosition(int column, int line, string guid)
         {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
+            var newGuid = Guid.Parse(guid);
+            return Json(Service.GetBlock(column, line, newGuid));
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CheckFullPath(string guid)
         {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var newGuid = Guid.Parse(guid);
+            return Json(Service.GetFullPath(newGuid));
         }
     }
 }

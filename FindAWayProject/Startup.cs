@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FindAWayProject.Generators;
+using FindAWayProject.Generators.Interfaces;
+using FindAWayProject.Services;
+using FindAWayProject.Services.Interfaces;
+using FindAWayProject.Strategies;
+using FindAWayProject.Strategies.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +32,13 @@ namespace FindAWayProject
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddTransient<ILevel, NormalLevel>();
+
+            services.AddTransient<IPathGenerator>(c => new PathGenerator(
+                c.GetRequiredService<ILevel>()));
+
+            services.AddTransient<IPathService>(c => new PathService(
+                c.GetRequiredService<IPathGenerator>()));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
